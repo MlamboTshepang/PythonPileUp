@@ -1,0 +1,18 @@
+import random
+WORDS = "python fastapi flask sqlite pillow panda snake docker kubernetes".split()
+Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+usedAlphabet = set()
+secret = random.choice(WORDS).upper()
+guessed=set(); tries=6
+while tries>0:
+    masked = " ".join(ch if ch in guessed else "_" for ch in secret)
+    print(masked, "tries:", tries)
+    if "_" not in masked: print("You win!"); break
+    ch = input("Guess letter: ").upper()
+    if not ch or ch in guessed: continue
+    guessed.add(ch)
+    if ch not in secret: tries-=1
+    usedAlphabet.add(ch)
+    print("Used letters:", " ".join(sorted(usedAlphabet))) 
+else:
+    print("You lose. Word was:", secret)
