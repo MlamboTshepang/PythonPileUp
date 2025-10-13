@@ -1,18 +1,72 @@
-import random
+import random, string, sys
+
 WORDS = "python fastapi flask sqlite pillow panda snake docker kubernetes".split()
-Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-usedAlphabet = set()
 secret = random.choice(WORDS).upper()
-guessed=set(); tries=6
-while tries>0:
+
+guessed = set()
+hits = set()
+misses = set()
+tries = 6
+
+USE_COLOR = sys.stdout.isatty()
+def color(ch, code):
+    # code: 32=green, 31=red, 90=dim gray
+    return f"\033[{code}m{ch}\033[0m" if USE_COLOR else ch
+
+def show_keyboard():
+    """Render a simple QWERTY keyboard with colors."""
+    rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+    for row in rows:
+        out = []
+        for ch in row:
+            if ch in hits:
+                out.append(color(ch, 32))
+            elif ch in misses:
+                out.append(color(ch, 31))
+            elif ch in guessed:
+                out.append(color(ch, 90))
+            else:
+                out.append(ch.lower())
+        print(" ".join(out))
+    print()  # spacer
+
+def show_alphabet_strip():
+    out = []
+    for ch in string.ascii_uppercase:
+        if ch in hits:
+            out.append(color(ch, 32))
+        elif ch in misses:
+            out.append(color(ch, 31))
+        elif ch in guessed:
+            out.append(color(ch, 90))
+        else:
+            out.append(ch.lower())
+    print("Alphabet:", " ".join(out))
+    print()
+
+while tries > 0:
     masked = " ".join(ch if ch in guessed else "_" for ch in secret)
     print(masked, "tries:", tries)
-    if "_" not in masked: print("You win!"); break
-    ch = input("Guess letter: ").upper()
-    if not ch or ch in guessed: continue
+    show_keyboard()
+    show_alphabet_strip()
+
+    if "_" not in masked:
+        print("You win!")
+        break
+
+    ch = input("Guess letter: ").strip().upper()[:1]
+    if not ch or not ch.isalpha():
+        continue
+    if ch in guessed:
+        print("Already guessed.\n")
+        continue
+
     guessed.add(ch)
-    if ch not in secret: tries-=1
-    usedAlphabet.add(ch)
-    print("Used letters:", " ".join(sorted(usedAlphabet))) 
+    if ch in secret:
+        hits.add(ch)
+    else:
+        misses.add(ch)
+        tries -= 1
 else:
     print("You lose. Word was:", secret)
+
