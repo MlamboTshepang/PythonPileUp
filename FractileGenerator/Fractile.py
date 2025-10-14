@@ -22,14 +22,14 @@ def koch_snowflake(t: Turtle, length: float, depth: int) -> None:
         t.right(120)
 
 def newfractal(t: Turtle, length: float, depth: int) -> None:
-    newfractal_side(t, length, depth)
     if depth == 0:
+        newfractal_side(t, length, depth)
         for _ in range(4):
             t.right(90)
             t.forward(length)
             l = length / 3.0
-            newfractal(t, l, depth + 1)
             t.left(90)
+        newfractal(t, l, depth + 1)
         newfractal(t, l, depth + 1)
     return
 
