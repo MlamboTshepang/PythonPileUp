@@ -21,6 +21,18 @@ def koch_snowflake(t: Turtle, length: float, depth: int) -> None:
         koch_segment(t, length, depth)
         t.right(120)
 
+def newfractal(t: Turtle, length: float, depth: int) -> None:
+    newfractal_side(t, length, depth)
+    if depth == 0:
+        for _ in range(4):
+            t.right(90)
+            t.forward(length)
+            l = length / 3.0
+            newfractal(t, l, depth + 1)
+            t.left(90)
+        newfractal(t, l, depth + 1)
+    return
+
 def sierpinski_triangle(t: Turtle, length: float, depth: int) -> None:
     def tri(size: float, lev: int) -> None:
         if lev == 0:
@@ -48,6 +60,8 @@ def fractal_tree(t: Turtle, length: float, depth: int, angle: float = 25.0, shri
     fractal_tree(t, length * shrink, depth - 1, angle, shrink)
     t.left(angle)
     t.back(length)
+
+
 
 # Main program - Enter Here
 def main() -> None:
@@ -124,6 +138,12 @@ def main() -> None:
             t.setheading(90)
             t.pendown()
             fractal_tree(t, 220, max(1, dep + 1))
+        elif frac == 'newfractal':
+            t.penup()
+            t.goto(-200, 100)
+            t.setheading(0)
+            t.pendown()
+            newfractal(t, 400, dep)
         else:
             t.penup()
             t.goto(0, 0)
