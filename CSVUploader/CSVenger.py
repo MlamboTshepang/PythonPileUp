@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 
 #------- Functions -----
-def analyze(path):
+def analyze(path, status_label):
     try:
         openfile = pd.read_csv(path)
         print("\n--- Console Analysis ---")
@@ -14,9 +14,10 @@ def analyze(path):
         return openfile
     except Exception as e:
         print(f"Error loading file '{path}': {e}")
+        status_label.config(text=f"Error loading file: {e}")
         return None
 
-def selectFile(target_frame):
+def selectFile(status_label, target_frame):
     file_path= filedialog.askopenfilename(title="Select CSV file", filetypes=[("CSV files", "*.csv")])
     if file_path:
         dataframe = analyze(file_path)
@@ -25,14 +26,14 @@ def selectFile(target_frame):
         print("No file selected.")
 
 def display_on_gui(df, frame):
-    """Clears the frame and displays the DataFrame in a Treeview widget."""
     # Clear any existing widgets in the frame (like an old table)
     for widget in frame.winfo_children():
         widget.destroy()
 
     if df is None:
         return
-
+    
+    df.columns = [str(col) for col in df.columns]  # Ensure all column names are strings
     # --- Create the Treeview with Scrollbars ---
     tree = ttk.Treeview(frame, show="headings")
     
@@ -45,13 +46,16 @@ def display_on_gui(df, frame):
     tree.configure(xscrollcommand=hsb.set)
 
     # Place the widgets on the screen
-    vsb.pack(side='right', fill='y')
-    hsb.pack(side='bottom', fill='x')
-    tree.pack(side='left', fill='both', expand=True)
+    vsb.grid(row=0, column=1, sticky='nsew')
+    hsb.grid(row=1, column=0, sticky='ns')
+    tree.grid(row=0, column=0, sticky='ew')
+
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
 
     # --- Populate the Treeview ---
     # 1. Define columns from the DataFrame's columns
-    tree["columns"] = list(df.columns)
+    tree["columns"] = list(df)
 
     # 2. Create column headings
     for col in df.columns:
@@ -74,8 +78,10 @@ if __name__=="__main__":
     control_frame = tk.Frame(root)
     control_frame.pack(pady=10, fill='x')
     
+    data_frame = tk.Frame(root)
+    data_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
-    welcome_label = tk.Label(root, text="Welcome to CSVenger!", font=("Helvetica", 16))
+    welcome_label = tk.Label(root, text="Welcome to CSVengeqr!", font=("Helvetica", 16))
     welcome_label.pack()
     
     # --- Data Frame for the Table ---
@@ -83,7 +89,7 @@ if __name__=="__main__":
     data_frame = tk.Frame(root)
     data_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
-    open_button = tk.Button(root, text="Open CSV File", command=lambda: selectFile(data_frame),
+    open_button = tk.Button(root, text="Open CSV File", command=lambda: selectFile(status_label, data_frame),
                             font=("Helvetica", 14),
                             height=2, width=15)
     
@@ -91,6 +97,9 @@ if __name__=="__main__":
     
     exit_button = tk.Button(root, text="Exit", command=root.quit,
                             font=("Helvetica", 14))
+    
+    status_label = tk.Label(root, text="Eish", fg="red")
+    status_label.pack(side='bottom', fill='x')
 
     welcome_label.pack(pady=20)
     open_button.pack(pady=10)
