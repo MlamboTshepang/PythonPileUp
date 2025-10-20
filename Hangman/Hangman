@@ -1,6 +1,6 @@
 import random, string, sys
 
-WORDS = "python fastapi flask sqlite pillow panda snake docker kubernetes".split()
+WORDS = "python fastapi flask sqlite pillow panda snake docker kubernetes vibes good".split()
 secret = random.choice(WORDS).upper()
 
 guessed = set()
