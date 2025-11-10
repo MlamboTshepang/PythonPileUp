@@ -1,0 +1,175 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
+class Program
+{
+    // Winning line indices
+    static readonly int[][] LINES = new[]
+    {
+        new[]{0,1,2}, new[]{3,4,5}, new[]{6,7,8},
+        new[]{0,3,6}, new[]{1,4,7}, new[]{2,5,8},
+        new[]{0,4,8}, new[]{2,4,6}
+    };
+
+    static void Main()
+    {
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("=== Tic-Tac-Toe ===");
+            Console.WriteLine("1) Play vs AI (unbeatable)");
+            Console.WriteLine("2) 2-Player (same keyboard)");
+            Console.Write("Choose (1/2): ");
+            var mode = Console.ReadLine()?.Trim();
+
+            if (mode == "2")
+                RunTwoPlayer();
+            else
+                RunVsAi();
+
+            Console.Write("\nPlay again? (y/n): ");
+            if (!Console.ReadLine()!.Trim().Equals("y", StringComparison.OrdinalIgnoreCase))
+                break;
+        }
+    }
+
+    // ---------- Core helpers ----------
+    static void PrintBoard(char[] b)
+    {
+        string Cell(int i) => b[i] == ' ' ? (i + 1).ToString() : b[i].ToString();
+        string Row(int r) => $" {Cell(r)} | {Cell(r+1)} | {Cell(r+2)} ";
+        const string Sep = "---+---+---";
+        Console.WriteLine();
+        Console.WriteLine(Row(0)); Console.WriteLine(Sep);
+        Console.WriteLine(Row(3)); Console.WriteLine(Sep);
+        Console.WriteLine(Row(6)); Console.WriteLine();
+    }
+
+    static char Winner(char[] b)
+    {
+        foreach (var line in LINES)
+            if (b[line[0]] != ' ' && b[line[0]] == b[line[1]] && b[line[1]] == b[line[2]])
+                return b[line[0]];
+        if (!b.Contains(' ')) return 'D'; // Draw
+        return '\0'; // None yet
+    }
+
+    static IEnumerable<int> AvailableMoves(char[] b)
+        => b.Select((v, i) => (v, i)).Where(x => x.v == ' ').Select(x => x.i);
+
+    static char CurrentPlayer(char[] b)
+        => b.Count(c => c == 'X') == b.Count(c => c == 'O') ? 'X' : 'O';
+
+    static int AskMove(string prompt, char[] b)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            var input = Console.ReadLine()?.Trim();
+            if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(input, "quit", StringComparison.OrdinalIgnoreCase))
+                throw new OperationCanceledException();
+
+            if (int.TryParse(input, out int n))
+            {
+                int idx = n - 1;
+                if (idx >= 0 && idx < 9 && b[idx] == ' ')
+                    return idx;
+            }
+            Console.WriteLine("Invalid move. Choose an empty cell 1-9.");
+        }
+    }
+
+    // ---------- Minimax (unbeatable AI) ----------
+    static int ScoreTerminal(char[] b, char ai)
+    {
+        var w = Winner(b);
+        if (w == ai) return 1;
+        if (w != '\0' && w != 'D') return -1;
+        if (w == 'D') return 0;
+        return int.MinValue; // non-terminal
+    }
+
+    static (int score, int move) Minimax(char[] board, char ai)
+    {
+        // Check terminal
+        int terminal = ScoreTerminal(board, ai);
+        if (terminal != int.MinValue) return (terminal, -1);
+
+        char turn = CurrentPlayer(board);
+        bool maximizing = (turn == ai);
+        int bestScore = maximizing ? int.MinValue : int.MaxValue;
+        int bestMove = -1;
+
+        foreach (var m in AvailableMoves(board))
+        {
+            board[m] = turn;
+            var (score, _) = Minimax(board, ai);
+            board[m] = ' ';
+
+            if (maximizing)
+            {
+                if (score > bestScore) { bestScore = score; bestMove = m; }
+            }
+            else
+            {
+                if (score < bestScore) { bestScore = score; bestMove = m; }
+            }
+        }
+        return (bestScore, bestMove);
+    }
+
+    // ---------- Game modes ----------
+    static void RunTwoPlayer()
+    {
+        var b = Enumerable.Repeat(' ', 9).ToArray();
+        while (true)
+        {
+            PrintBoard(b);
+            var w = Winner(b);
+            if (w != '\0')
+            {
+                Console.WriteLine(w == 'D' ? "It's a draw!" : $"{w} wins!");
+                return;
+            }
+            char turn = CurrentPlayer(b);
+            int move = AskMove($"Player {turn}, pick a spot (1-9): ", b);
+            b[move] = turn;
+        }
+    }
+
+    static void RunVsAi()
+    {
+        var b = Enumerable.Repeat(' ', 9).ToArray();
+
+        Console.Write("Be X or O? (X goes first) [X/O]: ");
+        var pick = Console.ReadLine()?.Trim().ToUpperInvariant();
+        char human = (pick == "O") ? 'O' : 'X';
+        char ai = (human == 'X') ? 'O' : 'X';
+
+        while (true)
+        {
+            PrintBoard(b);
+            var w = Winner(b);
+            if (w != '\0')
+            {
+                Console.WriteLine(w == 'D' ? "It's a draw!" : $"{w} wins!");
+                return;
+            }
+
+            char turn = CurrentPlayer(b);
+            if (turn == human)
+            {
+                int move = AskMove($"Your turn ({human}). Pick 1-9: ", b);
+                b[move] = human;
+            }
+            else
+            {
+                var (_, move) = Minimax(b, ai);
+                b[move] = ai;
+                Console.WriteLine($"AI ({ai}) plays {move + 1}.");
+            }
+        }
+    }
+}
