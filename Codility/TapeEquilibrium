@@ -1,0 +1,14 @@
+def main():
+    Array = [3,1,2,4,3]
+    for i in range(len(Array)):
+        place = Array[i]
+        Array.pop(i)
+        total = sum(Array)
+        print(f"place: {place} total: {total}")
+        print(Array)
+            
+
+if __name__ == "__main__":
+    main()
+
+# Mlambo Curations 2026 - Codility TapeEqulibrium Test
