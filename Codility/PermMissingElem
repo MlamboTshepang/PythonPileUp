@@ -1,0 +1,15 @@
+def main():
+    Array = [2, 3, 1, 5]
+    for i in range(10):
+        if (i  in Array):
+            print(f"{i} is in the array"
+                  f" and the index is {i}")
+        else:
+            print(f"{i} is not in the array"
+                  f" and the index is {i}")
+        
+
+if __name__ == "__main__":
+    main()
+
+# Mlambo Curations 2026 - Codility 
