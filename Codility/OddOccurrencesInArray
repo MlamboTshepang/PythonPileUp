@@ -1,0 +1,18 @@
+def main():
+    array = 10
+    arraygroup = []
+    for i in range(10):
+        if (i % 2) == 0:
+            # print(f"{array[i]}")
+            arraygroup.append("9")
+        elif (i % 2) == .5:
+            # print(f"{array[i]}")
+            arraygroup.append("3")
+        else:
+            arraygroup.append("5")
+        print(arraygroup)
+
+if __name__ == "__main__":
+    main()
+
+# Mlambo Curations 2026 - Codility 
