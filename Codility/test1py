@@ -1,0 +1,15 @@
+def main():
+    A = [3, 8, 9, 7, 6]
+    K = 3
+    new = []    
+    """Main entry point of the program."""
+    for i in range(len(A)):
+        index = (i + K + 1) % len(A)
+        new.append(A[index])
+    print(new)
+
+
+if __name__ == "__main__":
+    main()
+
+# Mlambo Curations 2026 - Codility 
